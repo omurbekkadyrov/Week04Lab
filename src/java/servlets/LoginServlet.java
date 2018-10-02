@@ -5,82 +5,81 @@
  */
 package servlets;
 
+import domain.UserService;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author 759388
  */
-public class LoginServlet extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet LoginServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet LoginServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+public class LoginServlet extends HttpServlet 
+{
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        if(request.getSession().getAttribute("username") == null)
+        {
+            Cookie[] cookies = request.getCookies();
+            for(int i=0;i<cookies.length;i++)
+            {
+                if(cookies[i].getName().equals("username"))
+                {
+                    request.setAttribute("username", cookies[i].getValue());
+                    request.setAttribute("rememberme", "checked");
+                }
+            }
+            request.getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+        }
+        else
+        {
+            response.sendRedirect("home");
+        }
     }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        HttpSession session = request.getSession();
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        UserService usr = new UserService();
+        
+        if(username.equals("") || username == null || password.equals("") || password == null || (usr.login(username, password)==null))
+        {
+            request.setAttribute("invalidlogin", "Invalid login");
+            request.setAttribute("${username}", username);
+            request.getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+        }
+        else
+        {
+            session.setAttribute("username", username);
+            if(request.getParameter("rememberme") != null)
+            {
+                Cookie c = new Cookie("username", username);
+                response.addCookie(c);
+            }
+            else
+            {
+                Cookie[] cookies = request.getCookies();
+                for(Cookie c : cookies)
+                {
+                    if(c.getName().equals("username"))
+                    {
+                        c.setMaxAge(0);
+                        response.addCookie(c);
+                    }
+                }
+            }
+            response.sendRedirect("home");
+        }
+        
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }
