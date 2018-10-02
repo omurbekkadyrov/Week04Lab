@@ -5,7 +5,6 @@
  */
 package domain;
 
-import java.io.Serializable;
 /**
  *
  * @author 759388
