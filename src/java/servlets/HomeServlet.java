@@ -24,7 +24,7 @@ public class HomeServlet extends HttpServlet
         
         HttpSession username = request.getSession();
         
-        if(!(request.getParameter("logout") == null))
+        if(request.getParameter("logout") != null)
         {
             username.setAttribute("username", null);
             request.setAttribute("invalidlogin", "You have successfully logged out.");

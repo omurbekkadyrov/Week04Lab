@@ -27,11 +27,9 @@ public class LoginServlet extends HttpServlet
         if(request.getSession().getAttribute("username") == null)
         {
             Cookie[] cookies = request.getCookies();
-            for(int i=0;i<cookies.length;i++)
-            {
-                if(cookies[i].getName().equals("username"))
-                {
-                    request.setAttribute("username", cookies[i].getValue());
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("username")) {
+                    request.setAttribute("username", cookie.getValue());
                     request.setAttribute("rememberme", "checked");
                 }
             }
@@ -52,10 +50,10 @@ public class LoginServlet extends HttpServlet
         String password = request.getParameter("password");
         UserService usr = new UserService();
         
-        if(username.equals("") || username == null || password.equals("") || password == null || (usr.login(username, password)==null))
+        if( username == null || password == null || (usr.login(username, password)==null) || username.equals("")  || password.equals("") )
         {
             request.setAttribute("invalidlogin", "Invalid login");
-            request.setAttribute("${username}", username);
+            //request.setAttribute("username", username);
             request.getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
         }
         else
