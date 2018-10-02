@@ -35,7 +35,7 @@ public class HomeServlet extends HttpServlet
         {
             response.sendRedirect("login");
         }
-        else if(!(username.getAttribute("username") == null))
+        else if((username.getAttribute("username") != null))
         {
             request.getRequestDispatcher("/WEB-INF/home.jsp").forward(request, response);
         }
